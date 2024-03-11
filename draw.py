@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def draw1D(
-    data: list, limits: list, plot_name: str, yscale="linear", show_plot=True, ylim=[]
+    data: list, limits: list, plot_name: str, yscale="linear", show_plot=True, ylim=[], legends=[]
 ):
 
     arg = np.linspace(limits[0], limits[1], data[0].size)
@@ -11,12 +11,15 @@ def draw1D(
     ax.set_title(plot_name)
     colors = ["blue", "red", "green"]
     for i in range(len(data)):
-        ax.plot(arg, data[i], colors[i % 3])
+        lab = legends[i] if legends else f"plot{i+1}"
+        ax.plot((1.0/arg), data[i], label=lab)
     if not ylim:
         ylim = [min([i.min() for i in data]), max([i.max() for i in data])]
     ax.set_yscale(yscale)
     ax.set_ylim(ymin=ylim[0], ymax=ylim[1])
+    ax.set_xlim(xmin=1.0/limits[0], xmax=1.0/limits[1])
     ax.grid(True)
+    ax.legend()
     if show_plot:
         plt.show()
     else:
@@ -57,8 +60,8 @@ def drawHeatmap(
     h = (limits[1] - limits[0])/n
     x = np.arange(limits[0] + h/2, limits[1], h)
     y = np.arange(limits[0] + h/2, limits[1], h)
-    #x, h = np.linspace(limits[0], limits[1], n, retstep=True)
-    #y = np.linspace(limits[0], limits[1], n)
+    ## x, h = np.linspace(limits[0], limits[1], n, retstep=True)
+    ## y = np.linspace(limits[0], limits[1], n)
     xgrid, ygrid = np.meshgrid(x, y)
     if not zlim:
         zlim = [data.min(), data.max()]
