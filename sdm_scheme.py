@@ -34,14 +34,15 @@ def createH(eps, tcc):
     return H, dH
 
 
-# def createH(eps, tcc):
-#    stef_bolc_loc = stef_bolc * 1.0e-8
-#
-#    H = lambda v: stef_bolc_loc * v**4
-#
-#    dH = lambda v: 4.0 * stef_bolc_loc * v**3
-#
-#    return H, dH
+def createH2(eps, tcc):
+    stef_bolc_loc = stef_bolc * 1.0e-8
+
+    H = lambda v: stef_bolc_loc * v**4
+
+    dH = lambda v: 4.0 * stef_bolc_loc * v**3
+
+    return H, dH
+
 
 
 ## SDM - Second Discrete Method
@@ -210,36 +211,45 @@ class SDM:
         dU, exit_code = bicgstab(
             A,
             R,
-            rtol=1.0e-3,
-            atol=1.0e-6,
+            rtol=1.0e-9,
+            atol=1.0e-12,
             x0=R,
         )
+        #drawHeatmap(self.U.reshape((self.n, self.n)), [0, 1], "initial guess")
         if exit_code:
             print(f"jacobian failed with exit code: {exit_code}")
             exit()
         err = np.abs(dU).max()
+        print(f"\t{err:.3e}")
         while err > eps:
+            #drawHeatmap(self.U.reshape((self.n, self.n)), [0, 1], "current solution")
             self.U += dU
             R = b - self.operator(self.U)
             dU, exit_code = bicgstab(
                 A,
                 R,
-                rtol=1.0e-3,
-                atol=1.0e-6,
+                rtol=1.0e-9,
+                atol=1.0e-12,
                 x0=dU,
             )
             if exit_code:
                 print(f"jacobian failed with exit code: {exit_code}")
                 exit()
             err = np.abs(dU).max()
+            print(f"\t{err:.3e}")
         return self.U.reshape((self.n, self.n))
 
 
 if __name__ == "__main__":
-    cells = 20
-    material = Material("template", 50.0)
+    cells = 50
+    tcc = 1.0
+    h = 1.0 / cells
+    material = Material("template", tcc)
+    H, dH = createH(h, tcc)
     test = Test(0, [0, 0], material, cells)
-    F, G = GetBoundary(test)
-    sdm = SDM(F, G, cells, 1.0 / cells, [0.0, 1.0], material)
-    res = sdm.solve(1.0e-4, 300.0 * np.ones_like(F))
+    F, G = GetBoundary(test, H)
+    #drawHeatmap(F, [0, 1], "F")
+    drawHeatmap(G, [0, 1], "G")
+    sdm = SDM(F, G, cells, h, [0.0, 1.0], material)
+    res = sdm.solve(1.0e-9, 300.0 * np.ones_like(F))
     drawHeatmap(res, [0, 1], "computed")

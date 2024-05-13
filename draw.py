@@ -12,14 +12,14 @@ def draw1D(
     colors = ["blue", "red", "green"]
     for i in range(len(data)):
         lab = legends[i] if legends else f"plot{i+1}"
-        ax.plot((1.0/arg), data[i], label=lab)
+        ax.plot(arg, data[i], label=lab)
     if not ylim:
         ylim = [min([i.min() for i in data]), max([i.max() for i in data])]
     ax.set_yscale(yscale)
     ax.set_ylim(ymin=ylim[0], ymax=ylim[1])
     ax.set_xlim(xmin=1.0/limits[0], xmax=1.0/limits[1])
     ax.grid(True)
-    ax.legend()
+    # ax.legend()
     if show_plot:
         plt.show()
     else:
