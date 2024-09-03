@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from draw import drawHeatmap
 from enviroment import Test, Material
-from boundary import GetBoundary, stef_bolc
+from boundary import GetBoundary, stef_bolc, w
 
 
 ## FDM - First Discrete Method
@@ -82,15 +82,17 @@ class FDM:
         if exit_code:
             print(f"operator failed with exit code: {exit_code}")
             exit()
-        U = (np.power(res / stef_bolc, 0.25) * 100.0).reshape((self.n, self.n))
+        U = (w * np.power(res / stef_bolc, 0.25)).reshape((self.n, self.n))
         return U
 
 
 if __name__ == "__main__":
-    cells = 50
+    cells = 25
     material = Material("template", 0.15)
     test = Test(0, [0, 0], material, cells)
     F, G = GetBoundary(test)
+    drawHeatmap(F, [0, 1], "F")
+    drawHeatmap(G, [0, 1], "G")
     fdm = FDM(F, G, cells, 1.0 / cells, [0.0, 1.0], material)
     res = fdm.solve()
     drawHeatmap(res, [0, 1], "computed")

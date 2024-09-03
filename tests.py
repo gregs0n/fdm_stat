@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 start = 10
-finish = 50
+finish = 20
 tccs = [1, 5, 10, 20]#, 50, 100, 200]
 cells_range = list(range(start, finish+1))
 
@@ -29,7 +29,7 @@ def main():
             sdm = SDM(
                F, G, cells, h, [0.0, 1.0], Material("template", tccs[i])
             )
-            sol_sdm = sdm.solve(1.0e-9, 300.0 * np.ones_like(F))
+            sol_sdm = sdm.solve(1.0e-9, 300.0 / w * np.ones_like(F))
             temp_length = sol_exact[i].max() - sol_exact[i].min()
             errs[tccs[i]][0].append(np.abs(sol_exact[i] - sol_fdm).max() / temp_length)
             errs[tccs[i]][1].append(np.abs(sol_exact[i] - sol_sdm).max() / temp_length)
@@ -40,7 +40,7 @@ def main():
     for i in range(len(tccs)):
         tcc = tccs[i]
         data += list(map(np.array, errs[tcc]))
-        legends += [f"FDM:$\lambda$={tcc}", f"SDM:$\lambda$={tcc}"]
+        legends += [f"FDM:$\\lambda$={tcc}", f"SDM:$\\lambda$={tcc}"]
 
     draw1D(
         data,
@@ -109,7 +109,7 @@ def draw_computed():
             np.load(f"errs/two_sin/lambda_{tcc:03d}:FDM.npy"),
             np.load(f"errs/two_sin/lambda_{tcc:03d}:SDM.npy"),
         ]
-        legends += [f"FDM:$\lambda$={tcc}", f"SDM:$\lambda$={tcc}"]
+        legends += [f"FDM:$\\lambda$={tcc}", f"SDM:$\\lambda$={tcc}"]
         #print(tcc, file=file1)
         #print(tcc, file=file2)
         #print(*cells_range, sep='\t', file=file1)
@@ -128,5 +128,5 @@ def draw_computed():
     )
 
 if __name__ == "__main__":
-    #main()
-    draw_computed()
+    main()
+    #draw_computed()

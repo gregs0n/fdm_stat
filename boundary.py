@@ -4,16 +4,17 @@ from scipy.integrate import nquad, quad
 from enviroment import Test, Material
 from draw import draw1D
 
-stef_bolc = 5.67036713
+to_norm = 1
+w = 100 if to_norm else 1
+stef_bolc = 5.67036713 if to_norm else 5.67036713e-8
 
 HeatStream = lambda t: stef_bolc * np.power(t, 4)
 
 
-def GetFunc(f_num, g_num, normed=0):
+def GetFunc(f_num, g_num):
     ## returns f(x, y) and list of 4 g(t) NORMED
-    w = 0.01 if normed else 1.0
-    tmax = w * 600.0  # 500K, actually
-    tmin = w * 300.0
+    tmax = 600.0 / w  # 500K, actually
+    tmin = 300.0 / w
     coef = tmax - tmin
     d = tmin
     f = lambda x, y: 0.0
@@ -39,7 +40,7 @@ def GetFunc(f_num, g_num, normed=0):
 def GetBoundary(test: Test, __Hs=HeatStream) -> list:
     bnd, material, cells, limits = list(test._asdict().values())[1:]
     
-    f_raw, g_raw = GetFunc(*bnd, __Hs == HeatStream)
+    f_raw, g_raw = GetFunc(*bnd)
     
     f = lambda x, y: __Hs(f_raw(x, y))
     g = [
