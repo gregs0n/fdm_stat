@@ -17,7 +17,7 @@ def draw1D(
         ylim = [min([i.min() for i in data]), max([i.max() for i in data])]
     ax.set_yscale(yscale)
     ax.set_ylim(ymin=ylim[0], ymax=ylim[1])
-    ax.set_xlim(xmin=1.0/limits[0], xmax=1.0/limits[1])
+    #ax.set_xlim(xmin=1.0/limits[0], xmax=1.0/limits[1])
     ax.grid(True)
     # ax.legend()
     if show_plot:

@@ -210,13 +210,14 @@ class SDM:
             rtol=1.0e-9,
             atol=1.0e-12,
             x0=R,
+            # callback=self._bicg_callback
         )
         #drawHeatmap(self.U.reshape((self.n, self.n)), [0, 1], "initial guess")
         if exit_code:
             print(f"jacobian failed with exit code: {exit_code}")
             exit()
         err = np.abs(dU).max()
-        #print(f"\t{err:.3e}")
+        print(f"{err:.3e}")
         while err > eps:
             #drawHeatmap(self.U.reshape((self.n, self.n)), [0, 1], "current solution")
             self.U += dU
@@ -227,26 +228,52 @@ class SDM:
                 rtol=1.0e-9,
                 atol=1.0e-12,
                 x0=dU,
+                # callback=self._bicg_callback
             )
             if exit_code:
                 print(f"jacobian failed with exit code: {exit_code}")
                 exit()
             err = np.abs(dU).max()
-            #print(f"\t{err:.3e}")
+            print(f"{err:.3e}")
         self.U *= w
         return self.U.reshape((self.n, self.n))
+    
+    def _bicg_callback(self, x_k: np.ndarray):
+        tmp = w * x_k.reshape((self.n, self.n))
+        nrm = self.h**2 * (
+            np.sum(tmp[1:-1, 1:-1])
+            + 0.5 * (
+                np.sum(tmp[0, 1:-1])
+                + np.sum(tmp[-1, 1:-1])
+                + np.sum(tmp[1:-1, 0])
+                + np.sum(tmp[1:-1, -1])
+            )
+            + 0.25 * (
+                tmp[0, 0]
+                + tmp[0, -1]
+                + tmp[-1, 0]
+                + tmp[-1, -1]
+            )
+        )
+
+        print(f"\t{nrm:.3e}")
 
 
 if __name__ == "__main__":
-    cells = 25
+    cells = 20
     tcc = 1.0
+
     h = 1.0 / cells
     material = Material("template", tcc)
-    H, dH = createH(h, tcc)
+    H, dH = createH(h, 2*tcc)
     test = Test(0, [0, 0], material, cells)
     F, G = GetBoundary(test, H)
-    #drawHeatmap(F, [0, 1], "F")
-    drawHeatmap(G, [0, 1], "G")
+    # drawHeatmap(F, [0, 1], "F")
+    # print(G[0, ::].max(), G[0, ::].min())
+    # drawHeatmap(G, [0, 1], "G")
+    # exit()
     sdm = SDM(F, G, cells, h, [0.0, 1.0], material)
     res = sdm.solve(1.0e-9, 300.0 / w * np.ones_like(F))
+    np.save("sdm_20sqs_tcc01_sol", res)
+    np.save("sdm_20sqs_tcc01_G", G)
     drawHeatmap(res, [0, 1], "computed")

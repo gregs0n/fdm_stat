@@ -43,12 +43,19 @@ def GetBoundary(test: Test, __Hs=HeatStream) -> list:
     f_raw, g_raw = GetFunc(*bnd)
     
     f = lambda x, y: __Hs(f_raw(x, y))
+    __x = np.linspace(0, 1, 1001)
+    __g = np.array([g_raw[0](t) for t in __x])
+    draw1D([__g], [0, 1], "plot")
+    print(__g.min(), __g.max())
     g = [
         lambda t: __Hs(g_raw[0](t)),
         lambda t: __Hs(g_raw[1](t)),
         lambda t: __Hs(g_raw[2](t)),
         lambda t: __Hs(g_raw[3](t)),
     ]
+    __g2 = np.array([g[0](t) for t in __x])
+    draw1D([__g2], [0, 1], "plot")
+    print(__g2.min(), __g2.max())
 
     h: np.float64 = (limits[1] - limits[0]) / cells
     F: np.ndarray = np.zeros((cells, cells))
